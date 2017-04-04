@@ -10,5 +10,4 @@ Two yeast genomes (Candida for while flies and Saccharomyces for lab flies) are 
 2. Index for bwa
 				
 		bwa index Fly2Yeasts.fa 
-		
-	
+		bwa mem Fly2Yeasts.fa /media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/KF5_R1.gz.trimpair.fastq.gz /media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/KF5_R2.gz.trimpair.fastq.gz -t 40 > KF5_Fly2Yeasts.sam
