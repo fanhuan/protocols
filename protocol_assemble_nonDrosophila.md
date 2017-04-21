@@ -57,14 +57,18 @@ i. map non_drosophila reads to the A.malorum genome [here](https://github.com/vo
   read is PCR or optical duplicate  
   supplementary alignment  
   for each mapping, the flag reflects the 12 criteria. Say one read that is paired(1) and mapped in proper pair(1), not unmapped(0), mate also not unmapped(0), it is the reverse strand(1), its mate is also on the reverse strand(1), it is the first in pair(1), not the second in pair(0, notice how you can have conflict informaiton here), it is the primary alignment(0), it did not fail platform/vendor quality checks(0), it is not PCR or optical duplicate(0), an not a suplementary alignment(0). Note how the criteria range from most common to less common to speed up the calculation. Here we have a bit score of 000001110011, which translate to 115 in decimal.  
-  So in this case, if I want the mapped reads, the only thing I would need is to for column 3 and 4 read unmapped and mate unmapped both to be 0, and other columns do not matter. This includes: 99, 147, 83, 163, 81, 161, 113, 177, 65, 129, 97, 145.
-		for name in ZI197N ZI256N ZI274N ZI366N ZI403N ZI418N KF8 KF18 KF21 KF22 KF24 FR109N FR110N FR112N FR11N FR126N FR157N FR198N FR219N FR312N FR59N KF10 KF11 KF1 KF20 KF23 KF2 KF3 KF4 KF5 KF6 KF7 KF9 ZI31N
-		bbmap.sh in1=../bbsplit/AMBIGUOUS_${ref}_1.fq in2=../bbsplit/AMBIGUOUS_${ref}_2.fq ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/$ref.fa fastareadlen=500 minhits=1 minratio=0.56 maxindel=20 qtrim=rl untrim=t trimq=6 out=ambg_$ref.sam
+  So in this case, if I want the mapped reads, the only thing I would need is to for column 3 and 4 read unmapped and mate unmapped both to be 0, and other columns do not matter. This includes: 99, 147, 83, 163, 81, 161, 113, 177, 65, 129, 97, 145.  
+		
+		samtools view -F4 -F8 178901.sam.gz | gzip > 178901_mapped.sam.gz
+		samtools view -H 178901.sam.gz > 178901.sam.header
+		
+		for name in ZI197N ZI256N ZI274N ZI366N ZI403N ZI418N KF8 KF18 KF21 KF22 KF24 FR109N FR110N FR112N FR11N FR126N FR157N FR198N FR219N FR312N FR59N KF10 KF11 KF1: KF20 KF23 KF2: KF3 KF4 KF5 KF6 KF7 KF9 ZI31N
+		do
+		cp 178901.sam.header ${name}_178901_mapped.sam
+		zcat 178901_mapped.sam.gz | grep $name >> ${name}_178901_mapped.sam
+		samtools view -bS ${name}_178901_mapped.sam | samtools sort > sorted_${name}_178901_mapped.bam
+		samtools mpileup sorted_${name}_178901_mapped.bam > coverage_${name}_178901_mapped.txt
+		python ~/scripts/coverage2region_general.py coverage_${name}_178901_mapped.txt > stats_${name}_178901_mapped.txt
+		done
 
->>> flag = []
->>> with open('178901.sam.flag') as fh:
-...     for line in fh:
-...             if line.split()[1] not in flag:
-...                     flag.append(line.split()[1])
-...                     print line.split()[1]
-... 
+Check the mapping similarity (move to ipython notebook: FlyMicrobiome: Percent identity)
