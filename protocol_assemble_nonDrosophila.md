@@ -72,3 +72,24 @@ i. map non_drosophila reads to the A.malorum genome [here](https://github.com/vo
 		done
 
 Check the mapping similarity (move to ipython notebook: FlyMicrobiome: Percent identity)
+
+~90%! Not bad. This is mainly because "subfilter=15" in bbmap; it only allows 15 mismatches.
+
+I start to notice that Wolbachia, apparently very present in this dataset, had number of hits or total hit lengths ranked around 100. This might be due to that the reads that maps to the Wolbachia genome were not assembled into contigs. Here we will first see how many reads were included in assembly; look at the case of wolbachia to see how many reads that map to the wolbachia genome were included in the assembly; then maybe we should just blast the reads. The problem with blasting reads is that there might be duplicated reads. Maybe we should only blast the reads that are not included in the assembly. But how do we combine the stats from the two parts afterwards? Maybe I should also study megahit to see whether there is a better parameter setting.
+
+1. how many reads were included in assembly?
+
+		export PATH=$PATH:/home/hfan/build/bbmap
+		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/nonDrosophila/Round4/nonDrosophila_round4/nonDrosophila_round4.contigs.fa in=/media/backup_2tb/Data/FlyMicrobiome/nonDrosophila/Round4/nonDrosophila_#.fq.gz out=megahit_assembly.sam.gz kfilter=22 subfilter=15 maxindel=80
+		samtools view -F4 -F8 megahit_assembly.sam.gz | gzip > megahit_assembly_mapped.sam.gz
+Header length: 42516  
+reads mapped:28297248
+non-Drosophila reads: 44734738-42516=44692222
+63% of the reads were assembled! Not bad at all.
+2. how many wolbachia reads were included in assembly?
+	
+		filterbyname.sh in=megahit_assembly_mapped.sam.gz names=1317678/1317678_mapped.sam.gz out=sharedWolbachia.sam include=t
+There are 5063300 reads mapped to Wolbachia genome (1317678_mapped.sam.gz). Among those, 4861464 reads (96%) were used in assembly. This is pretty amazing! OK. At least for wolbachia, the assembly was very good! So is it a problem with blast? Or processing of blast results? I'm like a detective. OK, so which contigs were those 4861464 reads mapped to? Are those contigs identified as wolbachia?
+Yes... But they are identified as different wolbachia. OK, time to assign taxon to each contig!
+
+
