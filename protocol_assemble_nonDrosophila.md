@@ -92,4 +92,16 @@ non-Drosophila reads: 44734738-42516=44692222
 There are 5063300 reads mapped to Wolbachia genome (1317678_mapped.sam.gz). Among those, 4861464 reads (96%) were used in assembly. This is pretty amazing! OK. At least for wolbachia, the assembly was very good! So is it a problem with blast? Or processing of blast results? I'm like a detective. OK, so which contigs were those 4861464 reads mapped to? Are those contigs identified as wolbachia?
 Yes... But they are identified as different wolbachia. OK, time to assign taxon to each contig!
 
+3. Find the lowest common ancester for each contig
 
+		python ~/GitHub/script/contig2taxon.py ~/Dropbox/Research/Drosophila/Round4/region/nodes.dmp ~/Dropbox/Research/Drosophila/Round4/Contig2Species.txt > contig2LCA.txt
+		
+	Since I did not download the same version of prot.accession2taxid and nodes.dmp, 5 of the taxid in the prot.accession2taxid are obselete. Manually fix them (upgrading to nodes.dmp) in Contig2Species.txt.  
+	482058	1980924  
+	1649555	1333996  
+	1715259	1334193  
+	1855411	1873524  	1917424	1788301
+	
+4. I have 305 congits, 414,652 bp in total has LCA of root! WTF. Maybe I should do the whole JGI thing, from gene calling to rps-blast. I have that pipeline. And in the end, "The latter is assigned as the last common ancestor of USEARCH hits of the genes on the scaffold/contig provided that at least 30 % of the genes have USEARCH hits."
+
+I looked at those root contigs. The similarities scores are very low. Filtering out similarity scores lower than 70%.
