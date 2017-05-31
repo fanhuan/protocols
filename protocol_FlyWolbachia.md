@@ -1,17 +1,19 @@
-### This protocol is used to set aside non-drosophila reads. 
-Two yeast genomes (Candida for while flies and Saccharomyces for lab flies) are included in the reference because there are reads that map equally good to drosophla and yeast based on preliminary analysis (using Saccharomyces only). In order to have reads that are possibly from yeast aside for yeast composition analysis, reads that have multiple mappings are considered non-drosophila reads.
+Based on results from protocol_Fly2Yeasts.md, the ambigious reads shared between drosophila and yeats are very limited (<1% of the yeast reads). Therefore in this version we are not going to split reads between drosophila and yeast, but only drosophila and nonDrosophila (nonDros,不作死). Instead, since we might expand Richard 2012 to 1000, here we use Wolbachia as another library for bbsplit.
  
-1. Construct reference (should use HanseniasporaUvarum as well, will update later)
+1. Get raw reads from NCBI based on accssion # in Table S2 of Lack 2016.  
 
-		cat CandidaKrusei.fa > Fly2Yeasts.fa
-		cat Saccharomyces.fa >> Fly2Yeasts.fa
-		cat Drosophila_melanogaster.BDGP6.dna_sm.toplevel.fa >> Fly2Yeasts.fa 
+		fastq-dump --gzip --split-files SRR*
 		
-2. bbsplit (see instructions [here](http://seqanswers.com/forums/showthread.php?t=41288))
+2. Quality control using [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic). Make sure the adaptor file is in the workin directory. (only uses one core, should be parrallized)
 
-	fastq files:
+		cp ~/build/Trimmomatic-0.36/adapters/TruSeq3-PE.fa ./
+		java -jar ~/build/Trimmomatic-0.36/trimmomatic-0.36.jar PE -phred33 ../round2/EA_inbred/EA59N_R1.fq.gz ../round2/EA_inbred/EA59N_R2.fq.gz EA59N_R2_paired.fq.gz EA59N_R2_unpaired.fq.gz EA59N_R1_paired.fq.gz EA59N_R1_unpaired.fq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+		
+3. Split between Drosophila and Wolbachia using [bbsplit](http://seqanswers.com/forums/showthread.php?t=41288).  
 
-		bbsplit.sh in=/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/KF5_R#.trimpair.fastq.gz ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/CandidaKrusei.fa,/media/backup_2tb/Data/FlyMicrobiome/Microbes/Saccharomyces.fa,/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Drosophila_melanogaster.BDGP6.dna_sm.toplevel.fa basename=o%_#.fq ambig2=split outu1=unmapped1.fq outu2=unmapped2.fq
+		export PATH=$PATH:/home/hfan/build/bbmap
+		bbsplit.sh in=/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/EA59N_R#_paired.fq.gz ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa,/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Drosophila_melanogaster.fa basename=%_#.fq.gz ambig2=split outu1=EA59N_R1_unmapped.fq.gz outu2=EA59N_R2_unmapped.fq.gz
+		
 	non-drosophila reads:  
 	
 		python ~/scripts/ambigous_consensus.py CandidaKrusei,Saccharomyces
