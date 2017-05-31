@@ -14,15 +14,29 @@
 		cat *_1.fq.gz >> nonDrosophila_1.fq.gz
 		cat *_2.fq.gz >> nonDrosophila_2.fq.gz
 		
-2. assembly (megahit)  
+2. assemble seperately for each population (megahit)  
 
-		megahit -r nonDrosophila_1.fq.gz -r nonDrosophila_2.fq.gz -o nonDrosophila_round4 --out-prefix nonDrosophila_round4
+		for prefix in FR ZI KF
+		do
+			for name in ${prefix}*
+			do
+				echo $name
+				cat $name/${name}_nonDrosophila_1.fq.gz >>  ${prefix}_nonDrosophila_1.fq.gz
+				cat $name/${name}_nonDrosophila_2.fq.gz >>  ${prefix}_nonDrosophila_2.fq.gz
+			done
+			megahit -r ${prefix}_nonDrosophila_1.fq.gz -r ${prefix}_nonDrosophila_2.fq.gz -o ${prefix}_megahit --out-prefix ${prefix}_megahit
+		done
+	FR: 10152 contigs, total 15095622 bp, min 200 bp, max 91386 bp, avg 1487 bp, N50 3030 bp	
+	ZI: 4594 contigs, total 10013029 bp, min 200 bp, max 117539 bp, avg 2180 bp, N50 5761 bp
+	KF: 31286 contigs, total 27063869 bp, min 200 bp, max 312105 bp, avg 865 bp, N50 1068 bp
+	Pooled: 42514 contigs, total 41367840 bp, min 200 bp, max 237365 bp, avg 973 bp, N50 1479 bp  
 
-	Stats: 42514 contigs, total 41367840 bp, min 200 bp, max 237365 bp, avg 973 bp, N50 1479 bp  
+3. Annotation: blastx
 
-3. blast (diamond) 
-
-		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q nonDrosophila_round4.contigs.fa -o nonDrosophila_round4.m8 --sensitive -p 30
+		for prefix in FR ZI KF
+		do
+		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q ${prefix}_megahit/${prefix}_megahit.contigs.fa -o ${prefix}_megahit/${prefix}_megahit.m8 --sensitive -p 30
+		done
 Total time = 16627.6s
 Reported 912475 pairwise alignments, 912475 HSSPs. This is why I don't like blast. 42514 contigs, 912475 alignments...  
 Output format(tabular):   
