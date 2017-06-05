@@ -14,32 +14,26 @@ Based on results from protocol_Fly2Yeasts.md, the ambigious reads shared between
 		export PATH=$PATH:/home/hfan/build/bbmap
 		bbsplit.sh in=/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/EA59N_R#_paired.fq.gz ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa,/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Drosophila_melanogaster.fa basename=%_#.fq.gz ambig2=split outu1=EA59N_R1_unmapped.fq.gz outu2=EA59N_R2_unmapped.fq.gz
 		
-	non-drosophila reads:  
-	
-		python ~/scripts/ambigous_consensus.py CandidaKrusei,Saccharomyces
-		cat ambigous_consensus_1.fq CandidaKrusei_1.fq Saccharomyces_1.fq unmapped1.fq > nonDrosophila_1.fq  
-		cat ambigous_consensus_2.fq CandidaKrusei_2.fq Saccharomyces_2.fq unmapped2.fq > nonDrosophila_2.fq
-		
-	re-split between 3 yeasts(bbsplit_huan.sh):  
-	
-		bbsplit.sh in=nonDrosophila_#.fq ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/CandidaKrusei.fa,/media/backup_2tb/Data/FlyMicrobiome/Microbes/Saccharomyces.fa,/media/backup_2tb/Data/FlyMicrobiome/Microbes/HanseniasporaUvarum.fa basename=%_#.fq ambig2=split outu1=unmapped_1.fq outu2=unmapped_2.fq
-		bbsplit.sh in=nonDrosophila_#.fq ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/CandidaKrusei.fa,/media/backup_2tb/Data/FlyMicrobiome/Microbes/Saccharomyces.fa,/media/backup_2tb/Data/FlyMicrobiome/Microbes/HanseniasporaUvarum.fa basename=%.sam ambig2=split
-		
-		
-4. Coverage of the three yeast genomes (min=no ambigous, max= plus all ambigous reads)  
+### Now we have two dataset: Wolbachia and others.
 
-		for ref in CandidaKrusei Saccharomyces HanseniasporaUvarum
-		do
-		samtools view -bS $ref.sam | samtools sort > sorted_$ref.bam
-		samtools mpileup sorted_$ref.bam > coverage_min_$ref.txt
-		python ~/scripts/coverage2region_general.py coverage_min_$ref.txt > stats_min_$ref.txt
-		#Step 1: map all the ambigous reads to the respective genome using bbmap and same parameters used in bbsplit.
-		bbmap.sh in1=../bbsplit/AMBIGUOUS_${ref}_1.fq in2=../bbsplit/AMBIGUOUS_${ref}_2.fq ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/$ref.fa fastareadlen=500 minhits=1 minratio=0.56 maxindel=20 qtrim=rl untrim=t trimq=6 out=ambg_$ref.sam
-		samtools view -bS ambg_$ref.sam | samtools sort > sorted_ambg_$ref.bam
-		samtools merge sorted_max_$ref.bam sorted_$ref.bam sorted_ambg_$ref.bam
-		samtools mpileup sorted_max_$ref.bam > coverage_max_$ref.txt
-		python ~/scripts/coverage2region_general.py coverage_max_$ref.txt > stats_max_$ref.txt
-		done
-4. kslam  
-Annotate all the unmappled reads using kslam and record the major groups.
+#### Route 1: Others(unmapped).
+1. Assembly from each population.  
+In order to use Megahit, we need to change the tag of all unmapped reads to represent their sample source, and then pull them together for each population. See EA_haploid below as an example. The full script is at cat_unmapped.sh in scripts.
+ 
 
+		for file in *R1*; do sample=`echo $file | cut -d \. -f 1`; zcat $file | sed s/SALLY:261:C0V2YACXX:2/$sample/g | gzip >> EA_haploid_unmapped1.fq.gz; done
+		for file in *R2*; do sample=`echo $file | cut -d \. -f 1`; zcat $file | sed s/SALLY:261:C0V2YACXX:2/$sample/g | gzip >> EA_haploid_unmapped2.fq.gz; done
+		megahit -r EA_haploid_unmapped1.fq.gz -r EA_haploid_unmapped2.fq.gz -o EA_haploid_megahit --out-prefix EA_haploid_unmapped  
+		 
+2. Taxonamy assignment  
+a. JGI uses [USEARCH](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq461):  
+"
+Genes are associated with KO terms [17] and EC num- bers based on USEARCH 6.0.294 results [18] comparing metagenome proteins against an isolate genome refer- ence database with maxhits of 50 and an e-value of 0.1....One top USEARCH hit per gene is also retained for the Phylogenetic Distri- bution tool in IMG and assignment of phylogenetic lineage to scaffolds and contigs. The latter is assigned as the last common ancestor of USEARCH hits of the genes on the scaffold/contig provided that at least 30 % of the genes have USEARCH hits.
+"  
+I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.html), which is supposed to be much faster.
+
+
+
+#### Route 2: Wolbachia.
+		
+	
