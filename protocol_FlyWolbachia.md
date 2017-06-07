@@ -18,19 +18,29 @@ Based on results from protocol_Fly2Yeasts.md, the ambigious reads shared between
 
 #### Route 1: Others(unmapped).
 1. Assembly from each population.  
-In order to use Megahit, we need to change the tag of all unmapped reads to represent their sample source, and then pull them together for each population. See EA_haploid below as an example. The full script is at cat_unmapped.sh in scripts.
- 
+The pooling of reads from different metagenome dataset is proposed in [crAss](https://www.ncbi.nlm.nih.gov/pubmed/23074261). In the paper, it did not discuss which assembler and what parameter settings should be used. It did mention to use assemblers that are less likely to produce chimera contigs. However, those assemblers also tend to form less and shorter contigs thus uses less reads (see a [review](http://journal.frontiersin.org/article/10.3389/fbioe.2015.00141) on different metagenomic assemblers. It was a tough decision: whether to include more reads or be more stringint on chimera contigs.  
+Apparently we would like to include more reads. But  
+In order to use Megahit, we need to change the tag of all unmapped reads to represent their sample source, and then pull them together for each population. I wrote a python script to generate a shell scrip to do the actual work. Note that we added a parameter to megahit. Smaller (default is 12) --k-step is supposed to be "more friendly to lower coverage" according to the wiki page of [megahit](https://github.com/voutcn/megahit/wiki/Assembly-Tips).
 
-		for file in *R1*; do sample=`echo $file | cut -d \. -f 1`; zcat $file | sed s/SALLY:261:C0V2YACXX:2/$sample/g | gzip >> EA_haploid_unmapped1.fq.gz; done
-		for file in *R2*; do sample=`echo $file | cut -d \. -f 1`; zcat $file | sed s/SALLY:261:C0V2YACXX:2/$sample/g | gzip >> EA_haploid_unmapped2.fq.gz; done
-		megahit -r EA_haploid_unmapped1.fq.gz -r EA_haploid_unmapped2.fq.gz -o EA_haploid_megahit --out-prefix EA_haploid_unmapped  
+		for name in EA_haploid  FR_haploid  SP_haploid  ZI_haploid EG_inbred   KF_inbred   SP_inbred   ZI_inbred
+		do
+			python ~/scripts/mergeUnmapped.py $name
+			sh ${name}_merge.sh
+			megahit -r ${name}_unmapped1.fq.gz -r ${name}_unmapped2.fq.gz -o EA_haploid_megahit --out-prefix EA_haploid_unmapped --k-step 10 
+		done
+		
+
 		 
 2. Taxonamy assignment  
 a. JGI uses [USEARCH](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq461):  
 "
 Genes are associated with KO terms [17] and EC num- bers based on USEARCH 6.0.294 results [18] comparing metagenome proteins against an isolate genome refer- ence database with maxhits of 50 and an e-value of 0.1....One top USEARCH hit per gene is also retained for the Phylogenetic Distri- bution tool in IMG and assignment of phylogenetic lineage to scaffolds and contigs. The latter is assigned as the last common ancestor of USEARCH hits of the genes on the scaffold/contig provided that at least 30 % of the genes have USEARCH hits.
 "  
-I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.html), which is supposed to be much faster.
+I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.html), which is supposed to be much faster. Remember last time we had a lot of issue with obsolete taxid? I decided to update the nr database this time (was updated on June 5th!) and rebuild the diamond database (.dmnd).  
+
+		wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+		diamond makedb --in nr.faa -d nr 
+		
 
 
 
