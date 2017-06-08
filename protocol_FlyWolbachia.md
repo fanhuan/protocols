@@ -42,13 +42,25 @@ I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.h
 
 		wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
 		diamond makedb --in nr.faa -d nr 
-		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q PE.fa -o PE.m6 --sensitive --taxonmap /media/backup_2tb/Data/nr_protein/prot.accession2taxid.gz --id 70 -e 1e-10 -f 6 qseqid sseqid slen staxids pident length evalue stitle
+		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q PE.fa -o PE.m6 --sensitive --taxonmap /media/backup_2tb/Data/nr_protein/prot.accession2taxid.gz --id 70 -e 1e-10 -f 6 qseqid sseqid qlen pident length evalue staxids stitle
 						
 
 
 
 #### Route 2: taxonomy classificaiton of reads ([k-SLAM](https://github.com/aindj/k-SLAM))
 
-### Wolbachia.
+### Wolbachia
+Following the pipeline as described in [Richardson 2012](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1003129).
+
+1. map Wolbachia reads back to the reference genome to calculate mean depth of coverage and breadth of coverage. Almost think I've done this before with some python scripts. (see region4circlize.sh)
+
+		export PATH=$PATH:/home/hfan/build/bbmap
+		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa in=$1/$2_Wolbachia_R#.fq.gz out=$2.sam.gz kfilter=22 subfilter=15 maxindel=80
 		
-	
+
+
+
+1. Splitting with Wolbachia and other genus that has isolation: Acetobacter, Lactobacillus, Gluconobacter,  Commensalibacter. Based on the tree we made for Acetobactecaea, we choose Acetobacter pasteurianus instead other Acetobacter since it is the furthest from the glocunobacter clade. In Lactobacillus we choose plantarum since it has been isolated 4 times (the highest among other Lactobacillus). The other two only had one isolates. This time we are going to keep the fly reads to make trees (then delete again?).  
+
+		export PATH=$PATH:/home/hfan/build/bbmap
+		bbsplit.sh in=/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/$1/$2_R#_paired.fq.gz ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa,/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Drosophila_melanogaster.fa basename=%_#.fq.gz ambig2=split outu1=EA59N_R1_unmapped.fq.gz outu2=EA59N_R2_unmapped.fq.gz
