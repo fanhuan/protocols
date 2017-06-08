@@ -14,19 +14,21 @@ Based on results from protocol_Fly2Yeasts.md, the ambigious reads shared between
 		export PATH=$PATH:/home/hfan/build/bbmap
 		bbsplit.sh in=/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Trimmomatic/EA59N_R#_paired.fq.gz ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa,/media/backup_2tb/Data/FlyMicrobiome/Drosophila/Drosophila_melanogaster.fa basename=%_#.fq.gz ambig2=split outu1=EA59N_R1_unmapped.fq.gz outu2=EA59N_R2_unmapped.fq.gz
 		
-### Now we have two dataset: Wolbachia and others.
+## Now we have two dataset: Wolbachia and others.
 
-#### Route 1: Others(unmapped).
+### Others
+#### Route 1: Pooled assembly and annotation.
 1. Assembly from each population.  
 The pooling of reads from different metagenome dataset is proposed in [crAss](https://www.ncbi.nlm.nih.gov/pubmed/23074261). In the paper, it did not discuss which assembler and what parameter settings should be used. It did mention to use assemblers that are less likely to produce chimera contigs. However, those assemblers also tend to form less and shorter contigs thus uses less reads (see a [review](http://journal.frontiersin.org/article/10.3389/fbioe.2015.00141) on different metagenomic assemblers. It was a tough decision: whether to include more reads or be more stringint on chimera contigs.  
 Apparently we would like to include more reads. But  
 In order to use Megahit, we need to change the tag of all unmapped reads to represent their sample source, and then pull them together for each population. I wrote a python script to generate a shell scrip to do the actual work. Note that we added a parameter to megahit. Smaller (default is 12) --k-step is supposed to be "more friendly to lower coverage" according to the wiki page of [megahit](https://github.com/voutcn/megahit/wiki/Assembly-Tips).
 
-		for name in EA_haploid  FR_haploid  SP_haploid  ZI_haploid EG_inbred   KF_inbred   SP_inbred   ZI_inbred
+		for name in EA_haploid EA_inbred EG_inbred FR_haploid FR_inbred KF_inbred SP_haploid SP_inbred ZI_haploid ZI_inbred
 		do
 			python ~/scripts/mergeUnmapped.py $name
 			sh ${name}_merge.sh
-			megahit -r ${name}_unmapped1.fq.gz -r ${name}_unmapped2.fq.gz -o EA_haploid_megahit --out-prefix EA_haploid_unmapped --k-step 10 
+			megahit -1 ${name}_unmapped1.fq.gz -2 ${name}_unmapped2.fq.gz -o ${name}_megahit_PE --out-prefix ${name}_unmapped_PE --k-step 10 
+			sed s/'>'/'>'${name}_/g ${name}_megahit_PE/${name}_unmapped_PE.contigs.fa >> PE.fa
 		done
 		
 
@@ -40,10 +42,13 @@ I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.h
 
 		wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
 		diamond makedb --in nr.faa -d nr 
-		
+		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q PE.fa -o PE.m6 --sensitive --taxonmap /media/backup_2tb/Data/nr_protein/prot.accession2taxid.gz --id 70 -e 1e-10 -f 6 qseqid sseqid slen staxids pident length evalue stitle
+						
 
 
 
-#### Route 2: Wolbachia.
+#### Route 2: taxonomy classificaiton of reads ([k-SLAM](https://github.com/aindj/k-SLAM))
+
+### Wolbachia.
 		
 	
