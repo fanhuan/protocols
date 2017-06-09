@@ -27,6 +27,7 @@ In order to use Megahit, we need to change the tag of all unmapped reads to repr
 		do
 			python ~/scripts/mergeUnmapped.py $name
 			sh ${name}_merge.sh
+			rm -r ${name}_megahit_PE
 			megahit -1 ${name}_unmapped1.fq.gz -2 ${name}_unmapped2.fq.gz -o ${name}_megahit_PE --out-prefix ${name}_unmapped_PE --k-step 10 
 			sed s/'>'/'>'${name}_/g ${name}_megahit_PE/${name}_unmapped_PE.contigs.fa >> PE.fa
 		done
