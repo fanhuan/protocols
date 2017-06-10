@@ -52,10 +52,13 @@ I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.h
 ### Wolbachia
 Following the pipeline as described in [Richardson 2012](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1003129).
 
-1. map Wolbachia reads back to the reference genome to calculate mean depth of coverage and breadth of coverage. Almost think I've done this before with some python scripts. (see region4circlize.sh)
+1. map Wolbachia reads back to the reference genome to calculate mean depth of coverage and breadth of coverage. Almost think I've done this before with some python scripts. (see coverage.sh)
 
 		export PATH=$PATH:/home/hfan/build/bbmap
-		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa in=$1/$2_Wolbachia_R#.fq.gz out=$2.sam.gz kfilter=22 subfilter=15 maxindel=80
+		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/Wolbachia.fa in=$1/$2_Wolbachia_R#.fq.gz out=$2_wolbachia.sam.gz kfilter=22 subfilter=15 maxindel=80
+		samtools view -bS $2_wolbachia.sam.gz | samtools sort > $2_wolbachia_sorted.bam 
+		samtools mpileup $2_wolbachia_sorted.bam > coverage_$2_wolbachia.txt
+		python ~/scripts/coverage2region_general.py coverage_$2_wolbachia.txt > stats_$2_wolbachia.txt
 		
 
 
