@@ -60,7 +60,13 @@ Following the pipeline as described in [Richardson 2012](http://journals.plos.or
 		samtools mpileup $2_wolbachia_sorted.bam > coverage_$2_wolbachia.txt
 		python ~/scripts/coverage2region_general.py coverage_$2_wolbachia.txt > stats_$2_wolbachia.txt
 		
-
+2. It seems like some of the strains are not wolbachia (50-70% of similarity). Therefore I was curious to see what's actually there. I decided to assemble 16s and see what they are. Ran into [EMIRGE](https://github.com/csmiller/EMIRGE). A bit painful to install but worked. It requires the insert mean and std for pair reads. So I needed to calculate that for each sample...  
+		
+		for name in 
+		cat ../nonDrosophila/Round5/KF_inbred/KF1_R2_unmapped.fq.gz >> KF1_nonDrosophila_R2.fq.gz 
+		cp /media/backup_2tb/Data/FlyMicrobiome/Wolbachia/KF1_nonDrosophila_R2.fq.gz ./
+		gunzip KF1_nonDrosophila_R2.fq.gz
+		./emirge.py KF1 -1 /media/backup_2tb/Data/FlyMicrobiome/Wolbachia/KF1_nonDrosophila_R1.fq.gz -2 KF1_nonDrosophila_R2.fq -b SILVA_128_SSURef_Nr99_tax_silva_trunc.ge1200bp.le2000bp.0.97.fixed -f SILVA_128_SSURef_Nr99_tax_silva_trunc.ge1200bp.le2000bp.0.97.fixed.fasta -l 101 -i 294 -s 91 --phred33 -a 30
 
 
 1. Splitting with Wolbachia and other genus that has isolation: Acetobacter, Lactobacillus, Gluconobacter,  Commensalibacter. Based on the tree we made for Acetobactecaea, we choose Acetobacter pasteurianus instead other Acetobacter since it is the furthest from the glocunobacter clade. In Lactobacillus we choose plantarum since it has been isolated 4 times (the highest among other Lactobacillus). The other two only had one isolates. This time we are going to keep the fly reads to make trees (then delete again?).  
