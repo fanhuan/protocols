@@ -44,8 +44,13 @@ I'm using [DIAMOND](http://www.nature.com/nmeth/journal/v12/n1/full/nmeth.3176.h
 		diamond makedb --in nr.faa -d nr 
 		diamond blastx -d /media/backup_2tb/Data/nr_protein/nr -q PE.fa -o PE.m6 --sensitive --taxonmap /media/backup_2tb/Data/nr_protein/prot.accession2taxid.gz --id 70 -e 1e-10 -f 6 qseqid sseqid qlen pident length evalue staxids stitle
 						
+Lots of contigs in the haploid assembly were identified either as Drosophila or other insects. This suggests the mapping was too stringent. The default parameters in bbsplit.sh are:  
 
+	maxindel=<20>        Don't look for indels longer than this.  Lower is faster.  Set to >=100k for RNA-seq.
+	minratio=<0.65>      Fraction of max alignment score required to keep a site.  Higher is faster.
+	minhits=<1>          Minimum number of seed hits required for candidate sites.  Higher is faster.
 
+Those are all for sensitivity, not for similarity control. Therefore the parameters used for similarity control are default ones in bbmap.sh. Since Drosophila and Wolbachia did not share much ambigous reads, I decided to only use bbwrap to generate the nonDrosophila reads, thus Round6! Starting another protocal... Really, one day before lab meeting? Huan...
 
 #### Route 2: taxonomy classificaiton of reads ([k-SLAM](https://github.com/aindj/k-SLAM))
 
