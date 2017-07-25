@@ -8,5 +8,7 @@ python3 ~/scripts/jgi-query.py http://genome.jgi.doe.gov/AttbisABBM2_FD/AttbisAB
 	
 ## checkM
 
-	checkm lineage_wf ABBM1_bin ABBM1_checkM -x fasta
+	
+	checkm lineage_wf folder_with_binned_fasta output_folder -x fasta 
+	e.g. $checkm lineage_wf ABBM1_bin ABBM1_checkM -x fasta
 
