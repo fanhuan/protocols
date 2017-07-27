@@ -1,6 +1,6 @@
 1. Download data.
 
-Accession numbers were aquired from Lack 2016 Table S2. Note that is the accession number is in SRX(instead of SRR), manual look-up from NCBI sra is neccessary. A helpful [post](https://edwards.sdsu.edu/research/fastq-dump/) on fastq-dump (part of the sra-toolkit) options.
+Accession numbers were aquired from Lack 2016 Table S2. Note that if the accession number is in SRX(instead of SRR), manual look-up from NCBI sra is neccessary. A helpful [post](https://edwards.sdsu.edu/research/fastq-dump/) on fastq-dump (part of the sra-toolkit) options.
 
 	fastq-dump --gzip --split-files --readids --dumpbase --skip-technical –clip --read-filter pass SRR_ID 
 
