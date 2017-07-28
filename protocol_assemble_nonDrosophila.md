@@ -7,7 +7,7 @@
 		
 2. assembly (megahit)  
 
-		megahit -r nonDrosophila_1.fq.gz -r nonDrosophila_2.fq.gz -o nonDrosophila_round4 --out-prefix nonDrosophila_round4
+		megahit -1 nonDrosophila_1.fq.gz -2 nonDrosophila_2.fq.gz -o nonDrosophila_round4 --out-prefix nonDrosophila_round4
 
 	Stats: 42514 contigs, total 41367840 bp, min 200 bp, max 237365 bp, avg 973 bp, N50 1479 bp  
 
