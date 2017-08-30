@@ -4,7 +4,7 @@ Following the pipeline as described in [Richardson 2012](http://journals.plos.or
 
 		export PATH=$PATH:/home/hfan/build/bbmap
 		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/$3.fa in=/media/backup_2tb/Data/FlyMicrobiome/nonDrosophila/Round5/$1/$2_R#_unmapped.fq.gz out=$2_$3.sam.gz kfilter=22 subfilter=15 maxindel=80
-		samtools view -bS $2_$3.sam.gz | samtools sort > $2_$3_sorted.bam
+		samtools view -bS -@ 40 $2_$3.sam.gz | samtools sort -@ 40> $2_$3_sorted.bam
 		samtools mpileup $2_$3_sorted.bam > coverage_$2_$3.txt
 		python ~/scripts/coverage2region_general.py coverage_$2_$3.txt > stats_$2_$3.txt
 		
