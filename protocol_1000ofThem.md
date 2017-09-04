@@ -2,7 +2,7 @@
 
 Accession numbers were aquired from Lack 2016 Table S2. Note that if the accession number is in SRX(instead of SRR), manual look-up from NCBI sra is neccessary. A helpful [post](https://edwards.sdsu.edu/research/fastq-dump/) on fastq-dump (part of the sra-toolkit) options.
 
-	fastq-dump --gzip --split-files --readids --dumpbase --skip-technical –clip --read-filter pass SRR_ID 
+	fastq-dump --gzip --split-files --dumpbase --skip-technical –clip --read-filter pass SRR_ID 
 
 2. Quality control using [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic). Make sure the adaptor file is in the workin directory. (only uses one core, should be parrallized)
 
