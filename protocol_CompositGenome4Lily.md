@@ -35,9 +35,9 @@ map nonDrosophila reads back to the reference genome to calculate mean depth of 
 
 		export PATH=$PATH:/home/hfan/build/bbmap
 		bbwrap.sh ref=/media/backup_2tb/Data/FlyMicrobiome/Microbes/$3.fa in=/media/backup_2tb/Data/FlyMicrobiome/nonDrosophila/Round5/$1/$2_R#_unmapped.fq.gz out=$2_$3.sam.gz kfilter=22 subfilter=15 maxindel=80
-		samtools view -bS $2_$3.sam.gz | samtools sort > $2_$3_sorted.bam
-		samtools mpileup $2_$3_sorted.bam > coverage_$2_$3.txt
-		python ~/scripts/coverage2region_general.py coverage_$2_$3.txt > stats_$2_$3.txt
+		samtools view -q 40 -bS ${sample}_$ref.sam.gz | samtools sort > ${sample}_$ref.bam
+    	samtools mpileup -B ${sample}_$ref.bam > ${sample}_$ref.mpileup
+    	python ~/scripts/coverage2region_general.py ${sample}_$ref.mpileup > stats_${sample}_$ref.txt
 		
 
 
