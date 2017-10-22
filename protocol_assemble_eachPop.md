@@ -24,7 +24,7 @@
 				cat $name/${name}_nonDrosophila_1.fq.gz >>  ${prefix}_nonDrosophila_1.fq.gz
 				cat $name/${name}_nonDrosophila_2.fq.gz >>  ${prefix}_nonDrosophila_2.fq.gz
 			done
-			megahit -r ${prefix}_nonDrosophila_1.fq.gz -r ${prefix}_nonDrosophila_2.fq.gz -o ${prefix}_megahit --out-prefix ${prefix}_megahit
+			megahit -1 ${prefix}_nonDrosophila_1.fq.gz -2 ${prefix}_nonDrosophila_2.fq.gz -o ${prefix}_megahit --out-prefix ${prefix}_megahit
 		done
 	FR: 10152 contigs, total 15095622 bp, min 200 bp, max 91386 bp, avg 1487 bp, N50 3030 bp	
 	ZI: 4594 contigs, total 10013029 bp, min 200 bp, max 117539 bp, avg 2180 bp, N50 5761 bp
